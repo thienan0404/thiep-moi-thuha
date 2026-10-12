@@ -7,6 +7,11 @@
 <meta content="#182522" name="theme-color"/>
 <meta content="Một lá thư nhỏ từ Thienan gửi Thuha: hẹn ngày 16/11 và lời mời ăn tối cùng mọi người ngày 18/11." name="description"/>
 <title>Thư mời gửi Thuha · Thienan</title>
+<!-- Vercel Web Analytics: page views on Hobby; custom events require Pro or Enterprise. -->
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
@@ -415,7 +420,7 @@ h1 em{font-style:normal;font-weight:600;letter-spacing:-.058em}
   <button type="button" class="rsvp-copy" id="replyCopy">Sao chép lời hồi âm</button>
 </section>
 <div class="letter-actions"><button id="foldButton" type="button">Gấp lá thư lại</button></div>
-<p class="letter-smallprint">Lời mời này không cần trả lời vội. Thuha cứ xem lịch của mình nhé.</p>
+<p class="letter-smallprint">Lời mời này không cần trả lời vội. Thuha cứ xem lịch của mình nhé. Trang có thể ghi nhận lượt xem ẩn danh.</p>
 </div>
 </article>
 <canvas class="celebration-canvas" id="celebrationCanvas" aria-hidden="true"></canvas>
@@ -428,10 +433,16 @@ h1 em{font-style:normal;font-weight:600;letter-spacing:-.058em}
   const closer=document.getElementById('closeButton');
   const folder=document.getElementById('foldButton');
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Event hooks are ready for Vercel Pro/Enterprise. On Hobby, only page views
+  // are included in Analytics; these custom events are not recorded.
+  const trackInviteEvent=(name)=>{
+    if (typeof window.va === 'function') window.va('event',{name});
+  };
   let timer;
   let closingTimer;
   const open=()=>{
     if(viewer.classList.contains('open')) return;
+    trackInviteEvent('Invitation: Envelope Opened');
     clearTimeout(timer);clearTimeout(closingTimer);
     trigger.classList.add('is-opening');trigger.setAttribute('aria-expanded','true');
     timer=setTimeout(()=>{
@@ -462,6 +473,7 @@ h1 em{font-style:normal;font-weight:600;letter-spacing:-.058em}
     replyPanel.hidden=!willOpen;
     replyToggle.setAttribute('aria-expanded',String(willOpen));
     if(willOpen){
+      trackInviteEvent('Invitation: Reply Panel Opened');
       requestAnimationFrame(()=>replyPanel.scrollIntoView({behavior:reduce?'auto':'smooth',block:'nearest'}));
     }
   });
@@ -555,6 +567,7 @@ h1 em{font-style:normal;font-weight:600;letter-spacing:-.058em}
     drawFireworks();
   };
   const chooseYes=()=>{
+    trackInviteEvent('Invitation: Yes Selected');
     replyText='Thienan ơi, chị đồng ý với lời mời đi chơi ngày 16/11 nhé!';
     replyPreview.textContent=replyText;
     replyFeedback.classList.remove('show');
@@ -617,6 +630,7 @@ h1 em{font-style:normal;font-weight:600;letter-spacing:-.058em}
     if(event.pointerType==='mouse' || event.pointerType==='pen')dodge(event);
   });
   no.addEventListener('pointerdown',(event)=>{
+    trackInviteEvent('Invitation: No Press Attempt');
     event.preventDefault();
     dodge(event);
   });
@@ -630,7 +644,7 @@ h1 em{font-style:normal;font-weight:600;letter-spacing:-.058em}
     dodge(event);
   });
   no.addEventListener('keydown',(event)=>{
-    if(event.key==='Enter'||event.key===' '){event.preventDefault();dodge();}
+    if(event.key==='Enter'||event.key===' '){trackInviteEvent('Invitation: No Press Attempt');event.preventDefault();dodge();}
   });
   // Cả khi rê chuột lại gần, nút sẽ tự lách đi trước khi bấm trúng.
   choices.addEventListener('pointermove',(event)=>{
